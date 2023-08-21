@@ -78,15 +78,15 @@ export const addCollectionAndDocuments = async (
 export const getCategoriesAndDocuments = async () => {
   const collectionRef = collection(db, "categories");
   const q = query(collectionRef);
+  // await Promise.reject(new Error("New Error Oops"));
 
   // untuk mengambil data categories
   const querySnapshot = await getDocs(q);
-  const categoryMap = querySnapshot.docs.reduce((acc, docSnapshot) => {
-    const { title, items } = docSnapshot.data();
-    acc[title.toLowerCase()] = items;
-    return acc;
-  }, {});
-
+  // console.log("Category Query Snapshot ", querySnapshot.docs)
+  const categoryMap = querySnapshot.docs.map((docSnapshot) =>
+    docSnapshot.data()
+  );
+  console.log(categoryMap);
   return categoryMap;
 };
 
@@ -118,7 +118,7 @@ export const createUserDocumentFromAuth = async (
     }
   }
 
-  return userDocRef;
+  return userSnapshot;
 };
 
 export const createAuthUserWithEmailAndPassowrd = async (email, password) => {
@@ -136,3 +136,17 @@ export const signOutUser = async () => await signOut(auth);
 // onAuthStateChanged akan mendapatakan data user setelah login sampai user tersebut logout. jadi ketika refresh browser data tersebut masih ada
 export const onAuthStateChangedListener = (callback) =>
   onAuthStateChanged(auth, callback);
+
+export const getCurrentUser = () => {
+  // Promise merupakan simulasi operasi asyncron dengan mempunyai status resolve jika operasi berhasil reject jika gagal
+  return new Promise((resolve, reject) => {
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      (userAuth) => {
+        unsubscribe();
+        resolve(userAuth);
+      },
+      reject
+    );
+  });
+};
